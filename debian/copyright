@@ -1,9 +1,0 @@
-Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: pxvirt-isoinfo
-Source: https://github.com/jiangcuo/pxvirt-isoinfo
-
-Files: *
-Copyright: Lierfang
-License: AGPL-3+
- On Debian systems the full text of the GNU Affero General Public License
- version 3 can be found at https://www.gnu.org/licenses/agpl-3.0.txt.

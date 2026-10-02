@@ -5,6 +5,10 @@ edition = "2024"
 description = "Detect the operating system on installation images without mounting them"
 license = "AGPL-3.0-or-later"
 rust-version = "1.88"
+authors = ["Lierfang Support Team <itsupport@lierfang.com>"]
+homepage = "https://github.com/jiangcuo/pxvirt-isoinfo"
+repository = "https://github.com/jiangcuo/pxvirt-isoinfo"
+readme = "README.md"
 
 [dependencies]
 anyhow = "1.0.104"
@@ -17,3 +21,24 @@ serde_json = "1.0.151"
 lto = true
 codegen-units = 1
 strip = true
+
+[package.metadata.deb]
+section = "admin"
+revision = "1"
+extended-description = """\
+Reads ISO 9660 (with Joliet and Rock Ridge) and UDF images without mounting \
+them and reports the operating system, version, architecture and installer \
+as JSON. For Windows images the editions in install.wim/install.esd are listed."""
+assets = [
+    ["target/release/pxvirt-isoinfo", "usr/bin/", "755"],
+    ["rules.json", "usr/share/pxvirt-isoinfo/", "644"],
+    ["README.md", "usr/share/doc/pxvirt-isoinfo/", "644"],
+]
+
+[package.metadata.generate-rpm]
+release = "1"
+assets = [
+    { source = "target/release/pxvirt-isoinfo", dest = "/usr/bin/pxvirt-isoinfo", mode = "755" },
+    { source = "rules.json", dest = "/usr/share/pxvirt-isoinfo/rules.json", mode = "644" },
+    { source = "README.md", dest = "/usr/share/doc/pxvirt-isoinfo/README.md", mode = "644", doc = true },
+]

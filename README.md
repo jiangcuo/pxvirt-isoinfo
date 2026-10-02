@@ -75,11 +75,11 @@ of the first image, the first match sets `name` and `ostype`.
 ## Building
 
 ```
-make            # build/pxvirt-isoinfo
-make check      # tests, need genisoimage
-make deb
-make rpm
+cargo build --release
+cargo test               # needs genisoimage
+cargo deb
+cargo build --release && cargo generate-rpm
 ```
 
-`RUST_TARGET=x86_64-unknown-linux-musl` builds a static binary, which the CI
-uses for the packages.
+The CI builds static binaries with `--target x86_64-unknown-linux-musl` and
+`aarch64-unknown-linux-musl`, so the packages work on any distribution release.
