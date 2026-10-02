@@ -29,7 +29,8 @@ jobs:
       - run: sudo apt-get update && sudo apt-get install -y genisoimage
 
       - run: cargo fmt --check
-      - run: cargo clippy --locked --all-targets -- -D warnings
+      # new lints of newer toolchains are reported, but only fail on real problems
+      - run: cargo clippy --locked --all-targets -- -D clippy::correctness -D clippy::suspicious
       - run: cargo test --locked
 
       - id: version

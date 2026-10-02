@@ -53,7 +53,7 @@ pub fn read_images(image: &Image, file: &Entry) -> Result<Vec<WimImage>> {
     }
     let data = file.read(image, offset, size)?;
 
-    let units: Vec<u16> = data.chunks_exact(2).map(|c| u16::from_le_bytes([c[0], c[1]])).collect();
+    let units: Vec<u16> = data.as_chunks::<2>().0.iter().map(|c| u16::from_le_bytes(*c)).collect();
     let xml = String::from_utf16_lossy(&units);
     parse_xml(xml.trim_start_matches('\u{feff}'))
 }

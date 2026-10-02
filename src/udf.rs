@@ -226,7 +226,7 @@ fn decode_dstring(buf: &[u8]) -> String {
         Some(8) => buf[1..].iter().map(|&b| b as char).collect::<String>().trim_end_matches('\0').to_string(),
         Some(16) => {
             let units: Vec<u16> =
-                buf[1..].chunks_exact(2).map(|c| u16::from_be_bytes([c[0], c[1]])).collect();
+                buf[1..].as_chunks::<2>().0.iter().map(|c| u16::from_be_bytes(*c)).collect();
             String::from_utf16_lossy(&units)
         }
         _ => String::new(),

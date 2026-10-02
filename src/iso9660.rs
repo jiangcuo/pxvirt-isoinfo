@@ -126,7 +126,7 @@ fn parse_record(record: &[u8], joliet: bool) -> Result<Option<(Entry, bool)>> {
     let size = u32_le(record, 10) as u64;
 
     let mut name = if joliet {
-        let units: Vec<u16> = raw_name.chunks_exact(2).map(|c| u16::from_be_bytes([c[0], c[1]])).collect();
+        let units: Vec<u16> = raw_name.as_chunks::<2>().0.iter().map(|c| u16::from_be_bytes(*c)).collect();
         String::from_utf16_lossy(&units)
     } else {
         // system use area with Rock Ridge entries follows the (even padded) name
