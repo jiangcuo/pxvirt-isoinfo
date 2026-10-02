@@ -1,0 +1,216 @@
+{
+    "arch_aliases": {
+        "amd64": "x86_64",
+        "x64": "x86_64",
+        "arm64": "aarch64",
+        "i386": "i686",
+        "i586": "i686",
+        "x86": "i686"
+    },
+    "windows": {
+        "images": ["sources/install.wim", "sources/install.esd", "sources/install.swm"],
+        "installer": "windows",
+        "versions": [
+            { "installation_type": "^Server", "min_build": 26100, "name": "Windows Server 2025", "ostype": "win11" },
+            { "installation_type": "^Server", "min_build": 20348, "name": "Windows Server 2022", "ostype": "win11" },
+            { "installation_type": "^Server", "min_build": 17763, "name": "Windows Server 2019", "ostype": "win10" },
+            { "installation_type": "^Server", "min_build": 14393, "name": "Windows Server 2016", "ostype": "win10" },
+            { "installation_type": "^Server", "min_build": 9600, "name": "Windows Server 2012 R2", "ostype": "win8" },
+            { "installation_type": "^Server", "min_build": 9200, "name": "Windows Server 2012", "ostype": "win8" },
+            { "installation_type": "^Server", "min_build": 7600, "name": "Windows Server 2008 R2", "ostype": "win7" },
+            { "installation_type": "^Server", "min_build": 6000, "name": "Windows Server 2008", "ostype": "w2k8" },
+            { "min_build": 22000, "name": "Windows 11", "ostype": "win11" },
+            { "min_build": 10240, "name": "Windows 10", "ostype": "win10" },
+            { "min_build": 9200, "name": "Windows 8", "ostype": "win8" },
+            { "min_build": 7600, "name": "Windows 7", "ostype": "win7" },
+            { "min_build": 6000, "name": "Windows Vista", "ostype": "w2k8" },
+            { "name": "Windows" }
+        ]
+    },
+    "linux": [
+        {
+            "id": "ubuntu",
+            "name": "Ubuntu",
+            "installer": "ubuntu",
+            "match": {
+                "files_all": ["casper"],
+                "content": [{ "file": ".disk/info", "regex": "^Ubuntu(-Server)? " }]
+            },
+            "info": [
+                { "file": ".disk/info", "regex": "^\\S+ (?P<version>\\d+(\\.\\d+)+).* - \\w+ (?P<arch>\\w+)" }
+            ]
+        },
+        {
+            "id": "mint",
+            "name": "Linux Mint",
+            "match": {
+                "content": [{ "file": ".disk/info", "regex": "^Linux Mint " }]
+            },
+            "info": [
+                { "file": ".disk/info", "regex": "^Linux Mint (?P<version>\\d+(\\.\\d+)*).* - \\w+ (?P<arch>\\w+)" }
+            ]
+        },
+        {
+            "id": "debian",
+            "name": "Debian",
+            "match": {
+                "content": [{ "file": ".disk/info", "regex": "^Debian GNU/Linux " }]
+            },
+            "info": [
+                { "file": ".disk/info", "regex": "^Debian GNU/Linux (?P<version>\\d+(\\.\\d+)*).* - \\w+ (?P<arch>\\w+)" }
+            ]
+        },
+        {
+            "id": "proxmox",
+            "name": "Proxmox",
+            "match": {
+                "files_all": [".cd-info"]
+            },
+            "info": [
+                { "file": ".cd-info", "regex": "(?m)^PRODUCTLONG='(?P<name>[^']+)'" },
+                { "file": ".cd-info", "regex": "(?m)^RELEASE='(?P<version>[^']+)'" }
+            ]
+        },
+        {
+            "id": "rhel",
+            "name": "Red Hat Enterprise Linux",
+            "installer": "kickstart",
+            "match": {
+                "content": [{ "file": ".treeinfo", "regex": "(?m)^family\\s*=\\s*Red Hat Enterprise Linux" }]
+            },
+            "info": [
+                { "file": ".treeinfo", "regex": "(?m)^version\\s*=\\s*(?P<version>\\S+)" },
+                { "file": ".treeinfo", "regex": "(?m)^arch\\s*=\\s*(?P<arch>\\S+)" }
+            ]
+        },
+        {
+            "id": "centos",
+            "name": "CentOS",
+            "installer": "kickstart",
+            "match": {
+                "content": [{ "file": ".treeinfo", "regex": "(?m)^family\\s*=\\s*CentOS" }]
+            },
+            "info": [
+                { "file": ".treeinfo", "regex": "(?m)^family\\s*=\\s*(?P<name>.*\\S)" },
+                { "file": ".treeinfo", "regex": "(?m)^version\\s*=\\s*(?P<version>\\S+)" },
+                { "file": ".treeinfo", "regex": "(?m)^arch\\s*=\\s*(?P<arch>\\S+)" }
+            ]
+        },
+        {
+            "id": "rocky",
+            "name": "Rocky Linux",
+            "installer": "kickstart",
+            "match": {
+                "content": [{ "file": ".treeinfo", "regex": "(?m)^family\\s*=\\s*Rocky Linux" }]
+            },
+            "info": [
+                { "file": ".treeinfo", "regex": "(?m)^version\\s*=\\s*(?P<version>\\S+)" },
+                { "file": ".treeinfo", "regex": "(?m)^arch\\s*=\\s*(?P<arch>\\S+)" }
+            ]
+        },
+        {
+            "id": "almalinux",
+            "name": "AlmaLinux",
+            "installer": "kickstart",
+            "match": {
+                "content": [{ "file": ".treeinfo", "regex": "(?m)^family\\s*=\\s*AlmaLinux" }]
+            },
+            "info": [
+                { "file": ".treeinfo", "regex": "(?m)^version\\s*=\\s*(?P<version>\\S+)" },
+                { "file": ".treeinfo", "regex": "(?m)^arch\\s*=\\s*(?P<arch>\\S+)" }
+            ]
+        },
+        {
+            "id": "oraclelinux",
+            "name": "Oracle Linux",
+            "installer": "kickstart",
+            "match": {
+                "content": [{ "file": ".treeinfo", "regex": "(?m)^family\\s*=\\s*Oracle Linux" }]
+            },
+            "info": [
+                { "file": ".treeinfo", "regex": "(?m)^version\\s*=\\s*(?P<version>\\S+)" },
+                { "file": ".treeinfo", "regex": "(?m)^arch\\s*=\\s*(?P<arch>\\S+)" }
+            ]
+        },
+        {
+            "id": "fedora",
+            "name": "Fedora",
+            "installer": "kickstart",
+            "match": {
+                "content": [{ "file": ".treeinfo", "regex": "(?m)^family\\s*=\\s*Fedora" }]
+            },
+            "info": [
+                { "file": ".treeinfo", "regex": "(?m)^version\\s*=\\s*(?P<version>\\S+)" },
+                { "file": ".treeinfo", "regex": "(?m)^arch\\s*=\\s*(?P<arch>\\S+)" }
+            ]
+        },
+        {
+            "id": "openeuler",
+            "name": "openEuler",
+            "installer": "kickstart",
+            "match": {
+                "content": [{ "file": ".treeinfo", "regex": "(?m)^family\\s*=\\s*openEuler" }]
+            },
+            "info": [
+                { "file": ".treeinfo", "regex": "(?m)^version\\s*=\\s*(?P<version>\\S+)" },
+                { "file": ".treeinfo", "regex": "(?m)^arch\\s*=\\s*(?P<arch>\\S+)" }
+            ]
+        },
+        {
+            "id": "anaconda",
+            "name": "Linux",
+            "installer": "kickstart",
+            "match": {
+                "files_all": [".treeinfo"]
+            },
+            "info": [
+                { "file": ".treeinfo", "regex": "(?m)^family\\s*=\\s*(?P<name>.*\\S)" },
+                { "file": ".treeinfo", "regex": "(?m)^version\\s*=\\s*(?P<version>\\S+)" },
+                { "file": ".treeinfo", "regex": "(?m)^arch\\s*=\\s*(?P<arch>\\S+)" }
+            ]
+        },
+        {
+            "id": "opensuse",
+            "name": "openSUSE",
+            "match": {
+                "label": "^openSUSE"
+            },
+            "info": [
+                { "file": "@label", "regex": "(?P<arch>x86_64|aarch64)" }
+            ]
+        },
+        {
+            "id": "sles",
+            "name": "SUSE Linux Enterprise",
+            "match": {
+                "label": "^SLE-"
+            },
+            "info": [
+                { "file": "@label", "regex": "^SLE-(?P<version>\\d+(-SP\\d+)?)" },
+                { "file": "@label", "regex": "(?P<arch>x86_64|aarch64)" }
+            ]
+        },
+        {
+            "id": "arch",
+            "name": "Arch Linux",
+            "match": {
+                "label": "^ARCH_\\d+",
+                "files_all": ["arch"]
+            },
+            "info": [
+                { "file": "@label", "regex": "^ARCH_(?P<version>\\d+)" }
+            ]
+        },
+        {
+            "id": "alpine",
+            "name": "Alpine Linux",
+            "match": {
+                "files_all": [".alpine-release"]
+            },
+            "info": [
+                { "file": ".alpine-release", "regex": "(?P<version>\\d+(\\.\\d+)*)" },
+                { "file": "@label", "regex": "(?P<arch>x86_64|aarch64)" }
+            ]
+        }
+    ]
+}

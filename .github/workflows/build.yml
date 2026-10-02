@@ -1,0 +1,173 @@
+name: Build
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: Publish a GitHub release with the packages
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - run: sudo apt-get update && sudo apt-get install -y genisoimage
+
+      - run: cargo fmt --check
+      - run: cargo clippy --locked --all-targets -- -D warnings
+      - run: cargo test --locked
+
+      - id: version
+        run: |
+          version=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -n1)
+          release=$(sed -n 's/^PKG_RELEASE = //p' Makefile)
+          echo "version=$version-$release" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: test
+    strategy:
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-latest
+          - arch: aarch64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    env:
+      RUST_TARGET: ${{ matrix.arch }}-unknown-linux-musl
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ env.RUST_TARGET }}
+
+      # static binary, so the packages work on any distribution release
+      - run: make RUST_TARGET=$RUST_TARGET
+
+      - run: |
+          file build/pxvirt-isoinfo
+          build/pxvirt-isoinfo --version
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bin-${{ matrix.arch }}
+          path: build/pxvirt-isoinfo
+          retention-days: 3
+
+  deb:
+    needs: build
+    strategy:
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-latest
+          - arch: aarch64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    container: debian:bookworm
+    steps:
+      - run: apt-get update && apt-get install -y --no-install-recommends build-essential debhelper dpkg-dev
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: bin-${{ matrix.arch }}
+          path: build
+
+      # mark as up to date, so make does not try to build it again
+      - run: chmod +x build/pxvirt-isoinfo && touch build/pxvirt-isoinfo
+
+      - run: make deb
+
+      - run: |
+          dpkg -i build/out/*.deb
+          pxvirt-isoinfo --version
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: deb-${{ matrix.arch }}
+          path: build/out/*.deb
+
+  rpm:
+    needs: build
+    strategy:
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-latest
+          - arch: aarch64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    container: rockylinux:9
+    steps:
+      - run: dnf install -y make rpm-build
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: bin-${{ matrix.arch }}
+          path: build
+
+      - run: chmod +x build/pxvirt-isoinfo && touch build/pxvirt-isoinfo
+
+      - run: make rpm
+
+      - run: |
+          rpm -i build/out/*.rpm
+          pxvirt-isoinfo --version
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rpm-${{ matrix.arch }}
+          path: build/out/*.rpm
+
+  release:
+    needs: [test, deb, rpm]
+    if: >-
+      inputs.release ||
+      (github.event_name == 'push' &&
+       github.ref == format('refs/heads/{0}', github.event.repository.default_branch))
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: v${{ needs.test.outputs.version }}
+    steps:
+      - id: check
+        run: |
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "release $TAG already exists, skipping"
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - if: steps.check.outputs.exists != 'true'
+        uses: actions/download-artifact@v4
+        with:
+          path: out
+          merge-multiple: true
+          pattern: '{deb,rpm}-*'
+
+      - if: steps.check.outputs.exists != 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG }}
+          name: pxvirt-isoinfo ${{ needs.test.outputs.version }}
+          target_commitish: ${{ github.sha }}
+          files: out/*

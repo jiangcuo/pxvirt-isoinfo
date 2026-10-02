@@ -1,0 +1,8 @@
+/target
+/build
+/debian/pxvirt-isoinfo
+/debian/.debhelper
+/debian/files
+/debian/*.substvars
+/debian/*.debhelper.log
+/debian/debhelper-build-stamp

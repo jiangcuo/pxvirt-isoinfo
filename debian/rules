@@ -1,0 +1,13 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+# the binary is built with cargo by 'make deb' before the package is built
+override_dh_auto_clean:
+override_dh_auto_build:
+override_dh_auto_test:
+
+override_dh_auto_install:
+	test -f build/pxvirt-isoinfo || (echo "run 'make' first" && false)
+	$(MAKE) install DESTDIR=$(CURDIR)/debian/pxvirt-isoinfo
