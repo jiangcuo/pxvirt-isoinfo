@@ -41,44 +41,47 @@ jobs:
 
   package:
     needs: test
-    strategy:
-      matrix:
-        include:
-          - arch: x86_64
-            runner: ubuntu-latest
-          - arch: aarch64
-            runner: ubuntu-24.04-arm
-    runs-on: ${{ matrix.runner }}
+    runs-on: ubuntu-latest
+    container: pxvirt/musl:latest
     env:
-      TARGET: ${{ matrix.arch }}-unknown-linux-musl
+      # the toolchain is installed for root, GitHub sets HOME to /github/home
+      CARGO_HOME: /root/.cargo
+      RUSTUP_HOME: /root/.rustup
+      TARGETS: >-
+        x86_64-unknown-linux-musl
+        aarch64-unknown-linux-musl
+        riscv64gc-unknown-linux-musl
+        loongarch64-unknown-linux-musl
     steps:
       - uses: actions/checkout@v4
 
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ env.TARGET }}
+      - name: Install tools
+        run: |
+          if command -v rustup >/dev/null; then rustup target add $TARGETS; fi
+          command -v cargo-deb >/dev/null || cargo install --locked cargo-deb
+          command -v cargo-generate-rpm >/dev/null || cargo install --locked cargo-generate-rpm
 
-      - run: cargo install --locked cargo-deb cargo-generate-rpm
+      # static binaries, linkers are configured in .cargo/config.toml
+      - name: Build
+        run: |
+          for target in $TARGETS; do
+            cargo build --release --locked --target $target
+          done
+          target/x86_64-unknown-linux-musl/release/pxvirt-isoinfo --version
 
-      # static binary, so the packages work on any distribution release
-      - run: cargo build --release --locked --target $TARGET
-
-      - run: |
-          file target/$TARGET/release/pxvirt-isoinfo
-          target/$TARGET/release/pxvirt-isoinfo --version
-
-      - run: |
-          cargo deb --no-build --target $TARGET --output out/
-          cargo generate-rpm --target $TARGET --output out/
-
-      - run: |
-          sudo dpkg -i out/*.deb
-          pxvirt-isoinfo --version
-          rpm -qlp out/*.rpm
+      - name: Package
+        run: |
+          for target in $TARGETS; do
+            arch=${target%%-*}
+            [ "$arch" = riscv64gc ] && arch=riscv64
+            cargo deb --no-build --target $target --output out/
+            cargo generate-rpm --target $target --arch $arch --output out/
+          done
+          ls -l out/
 
       - uses: actions/upload-artifact@v4
         with:
-          name: packages-${{ matrix.arch }}
+          name: packages
           path: out/*
 
   release:
@@ -103,8 +106,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: out
-          merge-multiple: true
-          pattern: 'packages-*'
+          name: packages
 
       - if: steps.check.outputs.exists != 'true'
         uses: softprops/action-gh-release@v2

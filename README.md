@@ -81,5 +81,6 @@ cargo deb
 cargo build --release && cargo generate-rpm
 ```
 
-The CI builds static binaries with `--target x86_64-unknown-linux-musl` and
-`aarch64-unknown-linux-musl`, so the packages work on any distribution release.
+The CI builds static binaries for x86_64, aarch64, riscv64 and loongarch64 in
+the `pxvirt/musl` image, which provides the musl cross toolchains configured in
+`.cargo/config.toml`, so the packages work on any distribution release.
