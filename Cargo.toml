@@ -24,7 +24,7 @@ strip = true
 
 [package.metadata.deb]
 section = "admin"
-revision = "1"
+revision = "2"
 extended-description = """\
 Reads ISO 9660 (with Joliet and Rock Ridge) and UDF images without mounting \
 them and reports the operating system, version, architecture and installer \
@@ -36,7 +36,7 @@ assets = [
 ]
 
 [package.metadata.generate-rpm]
-release = "1"
+release = "2"
 assets = [
     { source = "target/release/pxvirt-isoinfo", dest = "/usr/bin/pxvirt-isoinfo", mode = "755" },
     { source = "rules.json", dest = "/usr/share/pxvirt-isoinfo/rules.json", mode = "644" },
