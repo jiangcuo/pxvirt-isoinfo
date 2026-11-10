@@ -1,0 +1,17 @@
+# static builds with the musl cross toolchains of the pxvirt/musl image
+
+[target.x86_64-unknown-linux-musl]
+linker = "x86_64-unknown-linux-musl-gcc"
+rustflags = ["-C", "target-feature=+crt-static"]
+
+[target.aarch64-unknown-linux-musl]
+linker = "aarch64-unknown-linux-musl-gcc"
+rustflags = ["-C", "target-feature=+crt-static"]
+
+[target.riscv64gc-unknown-linux-musl]
+linker = "riscv64-unknown-linux-musl-gcc"
+rustflags = ["-C", "target-feature=+crt-static"]
+
+[target.loongarch64-unknown-linux-musl]
+linker = "loongarch64-unknown-linux-musl-gcc"
+rustflags = ["-C", "target-feature=+crt-static"]
